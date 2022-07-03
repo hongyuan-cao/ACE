@@ -10,9 +10,9 @@ xv = readtable('E:\RR\SAVE\graduate\pfa\R\Vbench.csv');%% change with your pathw
 xv = cell2mat(table2cell(xv));
 
 % remove poorly expressed markers
-vv = find(mean(xv,2)<6.5);
-ee = find(mean(xe,2)<6.5);
-ve = union(vv, ee);
+ve = readtable('E:\RR\SAVE\factor_model_real_data2022\real_data_analysis2022_5_7\index_remove.csv');
+% change with your pathway
+ve = cell2mat(table2cell(ve));
 xv(ve,:) = [];
 xe(ve,:) = [];
 
