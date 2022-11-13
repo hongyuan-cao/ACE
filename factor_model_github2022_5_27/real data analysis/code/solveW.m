@@ -1,27 +1,26 @@
 function W0_hat = solveW(Z,deltaa)
 %% estimate factor loading matrix B_hat, factor W0_hat
 global n h_hat
-
-%% £¨2£©ÇóbigsigmaµÄÌØÕ÷ÖµÌØÕ÷ÏòÁ¿£¬Õý½»»¯£¬ÅÅÐò
-[gama_norm, lambdaa] = svd(deltaa); %¶ÔÓÚ¶Ô³Æ¾ØÕóÓÐ deltaa = UU*VV*UU'
+[gama_norm, lambdaa] = svd(deltaa); % deltaa = UU*VV*UU'
 lam_sort = diag(lambdaa);
 
 %% get factor number estimation h_hat
-if ~(isreal(lam_sort))
-    error('ÌØÕ÷¸ùÊÇ¸´Êý')
-end
-bizhi = lam_sort(1:10)./lam_sort(2:11);
+% bizhi = lam_sort(1:(end-1))./lam_sort(2:end);
+h_max = 10;
+bizhi = lam_sort(1:(h_max-1))./lam_sort(2:h_max);
 [~,h_hat] = max(bizhi);
 %% estimate factor loading matrix B_hat
 B_hat = gama_norm(:,1:h_hat)*diag(sqrt(lam_sort(1:h_hat)));
 
-%% get factor W0_hat£¬
-x0 = zeros(h_hat,1); lb = repmat(-3,h_hat,1); ub = repmat(3,h_hat,1);
+%% get factor W0_hatï¼Œ
 W0_hat = zeros(h_hat,n);
-for jjj = 1:n
-    objfun =@(W) sum(abs(Z(:,jjj) - B_hat*W));
-    problem = createOptimProblem('fmincon','objective',objfun,'x0',x0,'lb',lb,...
-        'ub',ub,'options',optimset('Algorithm','SQP','Disp','none'));
-    gs = GlobalSearch;
-    W0_hat(:,jjj) = run(gs,problem);
+if h_hat == 1
+    for jjj = 1:n
+        ab = quantreg(B_hat, Z(:,jjj), 0.5, 1);
+        W0_hat(:,jjj) = ab(1);
+    end
+else
+    for jjj = 1:n
+        W0_hat(:,jjj) = quantreg(B_hat, Z(:,jjj), 0.5);
+    end    
 end
